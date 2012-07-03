@@ -6,17 +6,14 @@ It can create a fake RDF/skos dataset or load a custom one, and load it into Lin
 the insertion progress according to the server response, and measures the time for each operation. 
 
 ## Installation
-Use [npm](http://npmjs.org) to install:
+Use [npm](http://npmjs.org) to install: (soon)
     $ npm install -g lindory-put
 
 ## Usage
 
-    $ linput [OPTIONS]
+    $ linput [-u user:password] TARGET_URL [OPTIONS]
 
-
-
-* `-p | --port <port_number>`: port of lindory/tapis server (default valut is set to apache port).
-Port number can be replaced by 'apache' or 'restify', in order to use the pkgi.env values.
+* `-u | --user <user:password>`: User name and password that will be used for server authentication.
 * `-s | --size <box_number>`: size of generated data (number of boxes, default value is set to 50).
 Strings 'small', 'medium' and 'big' can also be used.
 * `-f | --force`: force generating data (generate a file "/dataset/bench-put.xml").
@@ -24,7 +21,6 @@ Strings 'small', 'medium' and 'big' can also be used.
 * `-C | --copy`: requests a copy of the bench container once uploaded.
 * `-l | --load <FILE>`: loads a custom XML file to send to the server. This disables any "-f | --force"
 option, preventing Linput from overwriting your custom file.
-
 
 ## Output 
 
