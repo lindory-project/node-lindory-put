@@ -6,7 +6,7 @@ It can create a fake RDF/skos dataset or load a custom one, and load it into Lin
 the insertion progress according to the server response, and measures the time for each operation. 
 
 ## Installation
-Use [npm](http://npmjs.org) to install: (soon)
+Use [npm](http://npmjs.org) to install:
     $ npm install -g lindory-put
 
 ## Usage
@@ -19,8 +19,11 @@ Strings 'small', 'medium' and 'big' can also be used.
 * `-f | --force`: force generating data (generate a file "/dataset/bench-put.xml").
 * `-c | --clean`: clean lindory after bench, by removing the container(s).
 * `-C | --copy`: requests a copy of the bench container once uploaded.
-* `-l | --load <FILE>`: loads a custom XML file to send to the server. This disables any "-f | --force"
+* `-i | --input <FILE>`: loads a custom XML file to send to the server. This disables any "-f | --force"
 option, preventing Linput from overwriting your custom file.
+If "_" is provided as FILE, then reads from the standard input.
+* `-z | --gzip, --ungzip, --gunzip`: Reads and decompress input using gzip. Implied when the filename 
+ends with ".gz".
 
 ## Output 
 
