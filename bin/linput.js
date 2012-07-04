@@ -32,9 +32,15 @@ var optiargs = {
     alias: 'force',
     boolean: true,
     description: 'Force generating data' },
-  'l': {
-    alias: 'load',
-    description: 'Load and send the given file (disables -f parameter)' },
+  'i': {
+    alias: 'input',
+    string: true,
+    description: 'Load and send the given file, or read from stdin if "_" is supplied '
+      + ' (disables -f parameter)' },
+  'z': {
+    alias: ['gzip', 'gunzip', 'gzip', 'uncompress'],
+    boolean: true,
+    description: '' },
   'c': {
     alias: 'clean',
     boolean: true,
@@ -61,6 +67,7 @@ if (argv.h) {
 
 // Host and port
 var targetUrl = url.parse(argv._.pop());
+//FIXME check if URL is valid
 
 // User authentication
 var userName = "";
@@ -84,12 +91,17 @@ argv.s = Number(argv.s);
 
 // Paths
 var filePath = "/tmp/linput-data.xml";
-if (argv.l) { filePath = argv.l; }
+if (argv.i) { filePath = argv.i; }
 
 var createString = 'Data generation';
 var putString = 'Put request';
 var copyString = 'Put copy request';
 
+
+process.on('SIGINT', function () {
+  console.log('\nAborting.'.yellow);
+  process.exit(1);
+});
 
 
 
@@ -182,10 +194,6 @@ var createFakeData = function (callback) {
 //
 var putRequest = function (callback) {
   tl.start(putString);
-  var fileSize = fs.statSync(filePath).size;
-  
-  console.log("# Sending bench file of size " + fileSize + " to "
-      + targetUrl.hostname.bold + " (port " + targetUrl.port + ")");
   var firstDataReceived = false;
   
   //Options for the PUT request
@@ -205,15 +213,21 @@ var putRequest = function (callback) {
   var request = http.request(putOptions, function (response) {
     response.on('end', function () {
       tl.stop(putString);
-      console.log('\nPut response: ' + response.statusCode);
+      if (response.statusCode === 409) {
+        console.log('\nPut response: ' + response.statusCode.toString().yellow
+            + ' - Container already exists'.yellow);
+      }
+      else {
+        console.log('\nPut response: ' + response.statusCode);
+      }
       
       callback();
     });
   });
-  
+
+  var countd = 0;
   request.on('response', function (response) {
     if (!firstDataReceived) {
-      console.log("Time to receive a response: ".grey + tl.getTimeString(putString).grey);
       firstDataReceived = true;
     }
     
@@ -226,7 +240,7 @@ var putRequest = function (callback) {
       count++;
       var errorMessage = (errCount > 0 ? " (" + errCount + " errors)" : "");
       process.stdout.write('\r\t' + count.toString().cyan + errorMessage.yellow
-          + ' → ' + chunk + "       | " + tl.getTimeString(putString).grey + "      ");
+          + ' → ' + chunk + "       | " + tl.getTimeString(putString).grey + "      " + countd.toString().blue);
     });
   });
   
@@ -237,10 +251,32 @@ var putRequest = function (callback) {
   request.setSocketKeepAlive(true);
   request.setNoDelay();
   
+  //File stream declaration and reading events
+  var inputName = "";
+  var inputStream = "";
   
-  // File stream declaration and reading events
-  var inputStream = fs.createReadStream(filePath); //zlib.createGunzip()???
+  if (filePath === "_") {
+    inputName = "stdin";
+    inputStream = process.stdin;
+    process.stdin.resume()
+  }
+  else {
+    var fileSize = fs.statSync(filePath).size;
+    inputName = "bench file of size " + fileSize;
+    
+    inputStream = fs.createReadStream(filePath);
+  }
+  
+  if (argv.i && (path.extname(filePath) === ".gz" || argv.z)) {
+    inputStream = inputStream.pipe(zlib.createGunzip());
+    inputName += " (" + "Gunzip activated".blue + ")";
+  }
+  console.log("# Sending " + inputName + " to "
+      + targetUrl.hostname.bold + " (port " + targetUrl.port + ")");
+  
+  
   inputStream.on('data', function (data) {
+    countd++;
     request.write(data);
   });
   //No event on close
@@ -277,7 +313,7 @@ var copyRequest = function (callback) {
       callback();
     });
   });
-  request.write('/bench-put.xml'); //URL à copier
+  request.write(targetUrl.path); //URL à copier
   
   request.on('response', function (response) {
     if (!firstDataReceived) {
@@ -406,17 +442,23 @@ if (userPass === undefined || userPass === "") {
 
 //Check if the test data file exists
 var fileExist = true;
+console.dir(argv)
 try {
   fileExist = fs.statSync(filePath).isFile();
 } catch (e) {
   fileExist = false;
-  if (argv.l) {
+  if (argv.i && argv.i !== "_") {
     console.log('# Error: the given file doesn\'t exist.'.red);
-    return;
+    process.exit(1);
   }
 }
+if (!fileExist && argv.i && argv.i !== "_") {
+  console.log('# Error: the given path is not a valid file.'.red);
+  process.exit(1);
+}
 
-if ((argv.f || !fileExist) && argv.l === undefined) {
+
+if ((argv.f || !fileExist) && argv.i === undefined) {
   waterfallFunctions.push(createFakeData);        //Create data
 }
 
