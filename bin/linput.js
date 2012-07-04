@@ -215,7 +215,7 @@ var putRequest = function (callback) {
       tl.stop(putString);
       if (response.statusCode === 409) {
         console.log('\nPut response: ' + response.statusCode.toString().yellow
-            + ' - Container already exists'.yellow);
+            + ' - Container already exists, use -c to clean'.yellow);
       }
       else {
         console.log('\nPut response: ' + response.statusCode);
@@ -225,7 +225,6 @@ var putRequest = function (callback) {
     });
   });
 
-  var countd = 0;
   request.on('response', function (response) {
     if (!firstDataReceived) {
       firstDataReceived = true;
@@ -240,7 +239,7 @@ var putRequest = function (callback) {
       count++;
       var errorMessage = (errCount > 0 ? " (" + errCount + " errors)" : "");
       process.stdout.write('\r\t' + count.toString().cyan + errorMessage.yellow
-          + ' → ' + chunk + "       | " + tl.getTimeString(putString).grey + "      " + countd.toString().blue);
+          + ' → ' + chunk + "       | " + tl.getTimeString(putString).grey + "      ");
     });
   });
   
@@ -276,7 +275,6 @@ var putRequest = function (callback) {
   
   
   inputStream.on('data', function (data) {
-    countd++;
     request.write(data);
   });
   //No event on close
@@ -442,7 +440,6 @@ if (userPass === undefined || userPass === "") {
 
 //Check if the test data file exists
 var fileExist = true;
-console.dir(argv)
 try {
   fileExist = fs.statSync(filePath).isFile();
 } catch (e) {

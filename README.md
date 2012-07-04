@@ -7,6 +7,7 @@ the insertion progress according to the server response, and measures the time f
 
 ## Installation
 Use [npm](http://npmjs.org) to install:
+
     $ npm install -g lindory-put
 
 ## Usage
@@ -22,8 +23,8 @@ Strings 'small', 'medium' and 'big' can also be used.
 * `-i | --input <FILE>`: loads a custom XML file to send to the server. This disables any "-f | --force"
 option, preventing Linput from overwriting your custom file.
 If "_" is provided as FILE, then reads from the standard input.
-* `-z | --gzip, --ungzip, --gunzip`: Reads and decompress input using gzip. Implied when the filename 
-ends with ".gz".
+* `-z | --gzip, --ungzip, --gunzip`: Reads and decompresses input using gzip. Implied when the filename 
+given with -i ends with ".gz".
 
 ## Output 
 
