@@ -38,7 +38,7 @@ var optiargs = {
     description: 'Load and send the given file, or read from stdin if "_" is supplied '
       + ' (disables -f parameter)' },
   'z': {
-    alias: ['gzip', 'gunzip', 'gzip', 'uncompress'],
+    alias: ['gzip', 'gunzip', 'ungzip', 'uncompress'],
     boolean: true,
     description: '' },
   'c': {
