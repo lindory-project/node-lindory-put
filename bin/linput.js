@@ -16,7 +16,6 @@ var prompt = require('prompt');
 var __ = require('underscore');
 
 var tl = new (require('../lib/timelogger.js'))();
-var env = {}; //FIXME toremove
 
 
 var optiargs = {
@@ -54,7 +53,7 @@ var optiargs = {
 }
 
 optimist.options(optiargs);
-optimist.usage('Usage: $0 [-u user:password] TARGET_URL [OPTIONS]')
+optimist.usage('Usage: $0 [-u <user:password>] TARGET_URL [OPTIONS]')
 var argv = optimist.argv;
 
 /*******************************
